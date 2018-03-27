@@ -1,17 +1,45 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, BackHandler, StyleSheet, TouchableHighlight } from 'react-native';
 import { connect } from 'react-redux';
+import { setActiveChat } from '../actions/ChatActions'
 
 export class ConversaInterna extends Component {
 	
-	static navigationOptions = {
+	static navigationOptions = ({navigation}) => ({
 		title:'Fulano',
-	}
+		headerLeft:(
+			<TouchableHighlight 
+				onPress={()=>{navigation.state.params.backFunction()}} 
+				underlayColor={false}>
+					<Image 
+						source={require('react-navigation/src/views/assets/back-icon.png')} 
+						style={{width:25, height:25, marginLeft:15}} 
+					/>
+			</TouchableHighlight>
+		)
+	})
 
 	constructor(props) {
 	  super(props);	
 	  this.state = {};
 
+	  this.back = this.back.bind(this);
+	}
+
+	componentDidMount() {
+		this.props.navigation.setParams({backFunction:this.back});
+		BackHandler.addEventListener('hardwareBackPress', this.back);
+	}
+
+	componentWillUnmount(){
+		BackHandler.removeEventListener('hardwareBackPress', this.back);
+	}
+
+	back(){
+		this.props.setActiveChat('');
+		this.props.navigation.goBack();
+
+		return true;
 	}
 
 	render(){
@@ -38,5 +66,5 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const ConversaInternaConnect = connect(mapStateToProps, {  })(ConversaInterna);
+const ConversaInternaConnect = connect(mapStateToProps, { setActiveChat })(ConversaInterna);
 export default ConversaInternaConnect;
