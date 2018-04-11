@@ -17,7 +17,11 @@ export class Preload extends Component {
 	  this.state = {};
 
 	  this.directPages = this.directPages.bind(this);
-	  this.props.checkLogin();
+		this.props.checkLogin();
+		
+		// TODO: Definir global Navigator para ter acesso às telas em qualquer ponto do app.
+		window.globalNavigator = this.props.navigation;
+
 	}
 
 	directPages() {

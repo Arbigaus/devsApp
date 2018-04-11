@@ -9,7 +9,7 @@ export const getChatList = ( userUid ) => {
 			snapshot.forEach((childItem)=>{
 				chats.push({
 					key:childItem.key,
-					user:childItem.val().user
+					title:childItem.val().title
 				});
 			});
 
@@ -56,39 +56,35 @@ export const createChat = (userUid1, userUid2) => {
 		// TODO: Criando o próprio CHAT
 		let newChat = firebase.database().ref('chats').push();
 		newChat.child('members').child(userUid1).set({
-			id:userUid1
+			id:userUid1 // Usuário logado
 		});
 		newChat.child('members').child(userUid2).set({
-			id:userUid2
+			id:userUid2 // Segundo usuário do chat
 		});
 
 		//TODO: Associando o chat aos envolvidos
 		let chatId = newChat.key;
-		let user1 = '';
-		let user2 = '';
 
 		firebase.database().ref('users').child(userUid1).once('value').then((snapshot)=>{
-			user1 = snapshot.val().name;
 			firebase.database().ref('users').child(userUid2).child('chats')
 				.child(chatId).set({
 					id:chatId,
-					user:user1
+					title:snapshot.val().name
 			});
 		});
 
 		firebase.database().ref('users').child(userUid2).once('value').then((snapshot)=>{
-			user2 = snapshot.val().name;
 			firebase.database().ref('users').child(userUid1).child('chats')
 				.child(chatId).set({
 					id:chatId,
-					user:user2
+					title:snapshot.val().name
 			});
-		});
+		});		
 
 		dispatch({
 			type:'setActiveChat',
 			payload:{
-				chatId:chatId
+				chatId:newChat.key
 			}
 		});
 		
@@ -103,47 +99,3 @@ export const setActiveChat = (chatId) => {
 		}
 	};
 };
-
-/*
-export const signInAction = (email, passwd)=>{
-	return(dispatch)=>{
-		firebase.auth().signInWithEmailAndPassword(email, passwd)
-			.then((user)=>{
-
-				let uid = firebase.auth().currentUser.uid;
-				
-				dispatch({
-					type:'changeUid',
-					payload:{
-						uid:uid
-					}
-				});
-
-			})
-			.catch((error)=>{
-				switch(error.code) {
-					case 'auth/invalid-email':
-						alert("E-mail Inválido.");
-						break;
-					case 'auth/user-disabled':
-						alert("Usuário Inativo.");
-						break;
-					case 'auth/user-not-found':
-						alert("Usuário não encontrado");
-						break;
-					case 'auth/wrong-password':
-						alert("E-mail ou Senha inválida!");
-						break;
-				}
-			});
-	};
-};
-*/
-// export const changeName = (name) => {
-// 	return {
-// 		type: 'changeName',
-// 		payload:{
-// 			name:name
-// 		}
-// 	}
-// };

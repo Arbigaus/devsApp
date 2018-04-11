@@ -23,12 +23,7 @@ export class Config extends Component {
 	sair(){
 		this.props.SignOut();
 
-		this.props.navigation.dispatch(NavigationActions.reset({
-			index:0,
-			actions:[
-				NavigationActions.navigate({routeName:'Home'})
-			]
-		}));
+		window.globalNavigator.navigate('Home');		
 	}
 
 	render(){

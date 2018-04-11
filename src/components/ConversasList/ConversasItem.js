@@ -17,7 +17,7 @@ export default class ConversasItem extends Component {
 	render() {
 		return (
 			<TouchableHighlight underlayColor="#DDDDDD" style={ConversasItemStyles.buttonArea} onPress={this.onClick}>
-				<Text>{this.props.data.user}</Text>
+				<Text>{this.props.data.title}</Text>
 			</TouchableHighlight>
 		)
 	}

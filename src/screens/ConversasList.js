@@ -22,12 +22,12 @@ export class ConversasList extends Component {
 
 	componentDidUpdate() {
 		if(this.props.activeChat != '') {
-			this.props.navigation.navigate('ConversaInterna');
+			this.props.navigation.navigate('ConversaInterna', {title:this.props.activeChatTitle});
 		}
 	}
 
 	conversaClick(data){
-		this.props.setActiveChat(data.user);
+		this.props.setActiveChat(data.key);
 	}
 
 	render(){
@@ -55,6 +55,7 @@ const mapStateToProps = (state) => {
 		status:state.auth.status,
 		uid:state.auth.uid,
 		activeChat:state.chat.activeChat,
+		activeChatTitle:state.chat.activeChatTitle,
 		chats:state.chat.chats
 	};
 };
