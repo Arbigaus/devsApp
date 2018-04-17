@@ -2,7 +2,8 @@ const initialState = {
 	chats:[],
 	contacts:[],
 	activeChat:'',
-	activeChatTitle:''
+	activeChatTitle:'',
+	activeChatMessages:[]
 };
 
 const ChatReducer = (state = initialState, action) => {
@@ -18,7 +19,7 @@ const ChatReducer = (state = initialState, action) => {
 	if(action.type == 'setActiveChat') {
 		// TODO: Definindo título do chat
 		let chatTitle = '';
-		alert(action.payload.chatId);
+		// alert(action.payload.chatId);
 		for(var i in state.chats) {
 			if(state.chats[i].key == action.payload.chatId) {
 				chatTitle = state.chats[i].title;
@@ -26,6 +27,10 @@ const ChatReducer = (state = initialState, action) => {
 		}
 
 		return {...state, activeChat:action.payload.chatId, activeChatTitle:chatTitle};
+	}
+
+	if(action.type == 'setActiveChatMessage'){
+		return {...state, activeChatMessages:action.payload.msgs};
 	}
 
 	return state;

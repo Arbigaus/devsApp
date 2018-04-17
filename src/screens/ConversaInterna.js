@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, Image, BackHandler, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, Image, BackHandler, FlatList, TextInput, StyleSheet, TouchableHighlight } from 'react-native';
 import { connect } from 'react-redux';
-import { setActiveChat } from '../actions/ChatActions'
+import { setActiveChat, sendMessage, monitorChat, monitorChatOff } from '../actions/ChatActions'
+import MensagemItem from '../components/ConversaInterna/MensagemItem';
 
 export class ConversaInterna extends Component {
 	
 	static navigationOptions = ({navigation}) => ({
 		title:navigation.state.params.title,
+		tabBarVisible:false,
 		headerLeft:(
 			<TouchableHighlight 
 				onPress={()=>{navigation.state.params.backFunction()}} 
@@ -21,31 +23,60 @@ export class ConversaInterna extends Component {
 
 	constructor(props) {
 	  super(props);	
-	  this.state = {};
+	  this.state = {			
+			inputText:''
+		};
 
 	  this.back = this.back.bind(this);
+	  this.sendMsg = this.sendMsg.bind(this);
 	}
 
 	componentDidMount() {
 		this.props.navigation.setParams({backFunction:this.back});
 		BackHandler.addEventListener('hardwareBackPress', this.back);
+
+		this.props.monitorChat(this.props.activeChat);
 	}
 
-	componentWillUnmount(){
-		BackHandler.removeEventListener('hardwareBackPress', this.back);
+	componentWillUnmount(){		
+		BackHandler.removeEventListener('hardwareBackPress', this.back);	
 	}
 
 	back(){
+		this.props.monitorChatOff(this.props.activeChat);
 		this.props.setActiveChat('');
 		this.props.navigation.goBack();
 
 		return true;
 	}
 
+	sendMsg(){
+		let txt = this.state.inputText;
+
+		let state = this.state;
+		state.inputText = '';
+		this.setState(state);
+
+		this.props.sendMessage(txt, this.props.uid, this.props.activeChat);
+	}
+
 	render(){
 		return (
 			<View style={styles.container}>
-				<Text>Página CONVERSA INTERNA</Text>
+				<FlatList
+					ref={(ref)=>{ this.chatArea = ref }} //TODO: Referenciar o FlatList para o this.chatArea
+					onContentSizeChange={()=>{ this.chatArea.scrollToEnd({animated:true}) }} //TODO: Ativar quando houve novo item no flatlist, ir para o final.
+					onLayout={()=>{ this.chatArea.scrollToEnd({animated:true}) }} //TODO: Ativar quando ativar o teclado.
+					style={styles.chatArea} 
+					data={this.props.activeChatMessages}
+					renderItem={({item})=><MensagemItem data={item} me={this.props.uid} />}
+				/>
+				<View style={styles.sendArea}>
+					<TextInput style={styles.sendInput} value={this.state.inputText} onChangeText={(inputText)=>this.setState({inputText})} />
+					<TouchableHighlight style={styles.sendButton} onPress={this.sendMsg} >
+						<Image style={styles.sendImage} source={require('../assets/images/send.png')} />
+					</TouchableHighlight>
+				</View>
 			</View>
 		);
 	}
@@ -54,17 +85,41 @@ export class ConversaInterna extends Component {
 
 const styles = StyleSheet.create({
 	container:{
+		flex:1
+	},
+	chatArea:{
 		flex:1,
-		margin:10
+		backgroundColor:'#CCCCCC'
+	},
+	sendArea:{
+		height:50,
+		backgroundColor:'#EEEEEE',
+		flexDirection: 'row'
+	},
+	sendInput:{
+		height:50,
+		flex:1
+	},
+	sendButton:{
+		width:50,
+		height:50,
+		justifyContent:'center'	,
+		alignItems:'center'
+	},
+	sendImage:{
+		width:30,
+		height:30	
 	}
 });
 
 const mapStateToProps = (state) => {
 	return {
 		status:state.auth.status,
-		uid:state.auth.uid
+		uid:state.auth.uid,
+		activeChat:state.chat.activeChat,
+		activeChatMessages:state.chat.activeChatMessages
 	};
 };
 
-const ConversaInternaConnect = connect(mapStateToProps, { setActiveChat })(ConversaInterna);
+const ConversaInternaConnect = connect(mapStateToProps, { setActiveChat, sendMessage, monitorChat, monitorChatOff })(ConversaInterna);
 export default ConversaInternaConnect;
