@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 
@@ -58,7 +58,8 @@ export class Preload extends Component {
 	render(){
 		return (
 			<View style={styles.container}>
-				<Text>Carregando...</Text>
+				<Text style={styles.title} >DevsApp 1.0</Text>
+				<Image source={require('../images/logo.png')} style={styles.img} />
 			</View>
 		);
 	}
@@ -68,7 +69,16 @@ export class Preload extends Component {
 const styles = StyleSheet.create({
 	container:{
 		flex:1,
-		margin:10
+		justifyContent: 'center',
+		alignItems:'center'
+	},
+	img:{
+		width:100,
+		height:100
+	},
+	title:{
+		fontSize: 20,
+		fontWeight: 'bold'
 	}
 });
 

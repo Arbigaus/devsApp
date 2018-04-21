@@ -38,7 +38,7 @@ export const checkLogin = () => {
 	}
 };
 
-export const signUpAction = (name, email, passwd) =>{
+export const signUpAction = (name, email, passwd, callback) =>{
 		// alert(passwd+' - '+email+' - '+name);
 	return (dispatch) => {
 		firebase.auth().createUserWithEmailAndPassword(email, passwd)
@@ -49,6 +49,8 @@ export const signUpAction = (name, email, passwd) =>{
 				firebase.database().ref('users').child(uid).set({
 					name:name
 				});
+
+				callback();
 
 				dispatch({
 					type:'changeUid',
@@ -73,17 +75,20 @@ export const signUpAction = (name, email, passwd) =>{
 						alert("Digite uma senha melhor!");
 						break;
 				}
+				callback();
 			});
 
 	};
 };
 
-export const signInAction = (email, passwd)=>{
+export const signInAction = (email, passwd, callback)=>{
 	return(dispatch)=>{
 		firebase.auth().signInWithEmailAndPassword(email, passwd)
 			.then((user)=>{
 
 				let uid = firebase.auth().currentUser.uid;
+
+				callback();
 				
 				dispatch({
 					type:'changeUid',
@@ -108,6 +113,7 @@ export const signInAction = (email, passwd)=>{
 						alert("E-mail ou Senha inválida!");
 						break;
 				}
+				callback();
 			});
 	};
 };
