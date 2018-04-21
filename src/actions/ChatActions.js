@@ -80,15 +80,17 @@ export const createChat = (userUid1, userUid2) => {
 				.child(chatId).set({
 					id:chatId,
 					title:snapshot.val().name
+				})
+				.then(()=>{
+					dispatch({
+						type:'setActiveChat',
+						payload:{
+							chatId:newChat.key
+						}
+					});
+				});
 			});
-		});
-		
-		dispatch({
-			type:'setActiveChat',
-			payload:{
-				chatId:newChat.key
-			}
-		});
+			
 		
 	}
 }

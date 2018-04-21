@@ -1,5 +1,17 @@
 import React, { Component } from 'react';
-import { View, Text, Image, BackHandler, FlatList, TextInput, StyleSheet, TouchableHighlight } from 'react-native';
+import { 
+	View, 
+	Text, 
+	Image, 
+	Platform,
+	FlatList, 
+	TextInput, 
+	StyleSheet,
+	BackHandler,
+	TouchableHighlight, 
+	KeyboardAvoidingView
+} from 'react-native';
+
 import { connect } from 'react-redux';
 import { setActiveChat, sendMessage, monitorChat, monitorChatOff } from '../actions/ChatActions'
 import MensagemItem from '../components/ConversaInterna/MensagemItem';
@@ -61,8 +73,12 @@ export class ConversaInterna extends Component {
 	}
 
 	render(){
+		// TODO: Strings para corrigir a abertura do teclado no IOS
+		let AreaBehavior = Platform.select({ios:'padding', android:null});
+		let AreaOffset = Platform.select({ios:64, android:null});
+		
 		return (
-			<View style={styles.container}>
+			<KeyboardAvoidingView style={styles.container} behavior={AreaBehavior} keyboardVerticalOffset={AreaOffset} >
 				<FlatList
 					ref={(ref)=>{ this.chatArea = ref }} //TODO: Referenciar o FlatList para o this.chatArea
 					onContentSizeChange={()=>{ this.chatArea.scrollToEnd({animated:true}) }} //TODO: Ativar quando houve novo item no flatlist, ir para o final.
@@ -77,7 +93,7 @@ export class ConversaInterna extends Component {
 						<Image style={styles.sendImage} source={require('../assets/images/send.png')} />
 					</TouchableHighlight>
 				</View>
-			</View>
+			</KeyboardAvoidingView>
 		);
 	}
 
