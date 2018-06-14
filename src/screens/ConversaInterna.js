@@ -11,9 +11,14 @@ import {
 	TouchableHighlight, 
 	KeyboardAvoidingView
 } from 'react-native';
+import ImagePicker from 'react-native-image-picker';
+import RNFetchBlob from 'react-native-fetch-blob';
+
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+window.Blob = RNFetchBlob.polyfill.Blob;
 
 import { connect } from 'react-redux';
-import { setActiveChat, sendMessage, monitorChat, monitorChatOff } from '../actions/ChatActions'
+import { setActiveChat, sendMessage, monitorChat, sendImage, monitorChatOff } from '../actions/ChatActions'
 import MensagemItem from '../components/ConversaInterna/MensagemItem';
 
 export class ConversaInterna extends Component {
@@ -36,11 +41,13 @@ export class ConversaInterna extends Component {
 	constructor(props) {
 	  super(props);	
 	  this.state = {			
-			inputText:''
+			inputText:'',
+			pct:0
 		};
 
 	  this.back = this.back.bind(this);
 	  this.sendMsg = this.sendMsg.bind(this);
+	  this.chooseImage = this.chooseImage.bind(this);
 	}
 
 	componentDidMount() {
@@ -69,7 +76,46 @@ export class ConversaInterna extends Component {
 		state.inputText = '';
 		this.setState(state);
 
-		this.props.sendMessage(txt, this.props.uid, this.props.activeChat);
+		this.props.sendMessage('text', txt, this.props.uid, this.props.activeChat);
+	}
+
+	chooseImage(){
+		
+		ImagePicker.showImagePicker(null, (r)=>{
+			if(r.uri) {
+				
+				let uri = r.uri.replace('file://', '');
+
+				RNFetchBlob.fs.readFile(uri, 'base64')
+					.then((data)=>{
+						return RNFetchBlob.polyfill.Blob.build(data, {type:'image/jpeg;BASE64'});
+					})
+					.then((blob)=>{
+						this.props.sendImage(
+							blob,
+							// Parametro de progresso.
+							(snapshot)=>{								
+								let pct = (snapshot.bytesTransferred / snapshot.totalBytes ) * 100;
+
+								let state = this.state;
+								state.pct = pct;
+								this.setState(state);
+
+							},
+							// Parametro de imagem
+							(imgName)=>{
+								let state = this.state;
+								state.pct = 0;
+								this.setState(state);
+
+								this.props.sendMessage('image', imgName, this.props.uid, this.props.activeChat);
+						});
+
+					});
+
+			}
+		});
+
 	}
 
 	render(){
@@ -87,7 +133,17 @@ export class ConversaInterna extends Component {
 					data={this.props.activeChatMessages}
 					renderItem={({item})=><MensagemItem data={item} me={this.props.uid} />}
 				/>
+
+				{this.state.pct > 0 &&
+					<View style={styles.imageTmp}>
+						<View style={[{width:this.state.pct+'%'},styles.imageTmpBar]} ></View>
+					</View>
+				}
+
 				<View style={styles.sendArea}>
+					<TouchableHighlight  style={styles.imageButton} onPress={this.chooseImage} >
+						<Image style={styles.imageBtnImage}  source={require('../assets/images/img_logo.png')} />
+					</TouchableHighlight>
 					<TextInput style={styles.sendInput} value={this.state.inputText} onChangeText={(inputText)=>this.setState({inputText})} />
 					<TouchableHighlight style={styles.sendButton} onPress={this.sendMsg} >
 						<Image style={styles.sendImage} source={require('../assets/images/send.png')} />
@@ -122,9 +178,26 @@ const styles = StyleSheet.create({
 		justifyContent:'center'	,
 		alignItems:'center'
 	},
+	imageButton:{
+		width:50,
+		height:50,
+		justifyContent:'center'	,
+		alignItems:'center'
+	},
 	sendImage:{
 		width:30,
 		height:30	
+	},
+	imageBtnImage:{
+		width:30,
+		height:30
+	},
+	imageTmp:{
+		height: 10
+	},
+	imageTmpBar:{
+		height: 10,
+		backgroundColor:'#FF0000'
 	}
 });
 
@@ -137,5 +210,5 @@ const mapStateToProps = (state) => {
 	};
 };
 
-const ConversaInternaConnect = connect(mapStateToProps, { setActiveChat, sendMessage, monitorChat, monitorChatOff })(ConversaInterna);
+const ConversaInternaConnect = connect(mapStateToProps, { setActiveChat, sendMessage, monitorChat, sendImage, monitorChatOff })(ConversaInterna);
 export default ConversaInternaConnect;

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 
 export default class MensagemItem extends Component {
 	constructor(props) {
@@ -45,7 +45,12 @@ export default class MensagemItem extends Component {
 	render() {
 		return (
 			<View style={[MensagemItemStyles.area, {alignSelf:this.state.align, backgroundColor:this.state.bgColor}]} >
-				<Text style={{textAlign:this.state.txtAlign}}>{this.props.data.m}</Text>
+				{this.props.data.msgType == 'text' &&
+					<Text style={{textAlign:this.state.txtAlign}}>{this.props.data.m}</Text>
+				}
+				{this.props.data.msgType == 'image' &&
+					<Image style={MensagemItemStyles.image} source={{uri:this.props.data.imgSource}} />
+				} 
 				<Text style={MensagemItemStyles.dateTxt}>{this.state.dateMsg}</Text>
 			</View>
 		)
@@ -66,5 +71,9 @@ const MensagemItemStyles = StyleSheet.create({
 	dateTxt:{
 		fontSize:10,
 		textAlign:'right'
+	},
+	image:{
+		width: 200,
+		height: 200
 	}
 });
